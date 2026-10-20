@@ -122,7 +122,7 @@ fn parse_func_body<'a>(l: &mut Lexer<'a>) -> Result<Func, ParseError<'a>> {
     while l.peek_token()?.tok != Token::CloseCurly {
         let saved_l = l.clone();
         match parse_expr(l) {
-            Ok(expr) => func.exprs.push(expr),
+            Ok(expr) => func.exprs.push((saved_l.get_loc(), expr)),
             Err(err) => {
                 *l = saved_l;
                 parse_vars_decl(&mut func.vars, l).map_err(|_| err)?
@@ -174,7 +174,7 @@ pub fn parse_file(filename: &str) -> Result<AST, Box<dyn std::error::Error>> {
 #[derive(Debug)]
 struct Func {
     vars: HashMap<String, String>,
-    exprs: Vec<Expr>,
+    exprs: Vec<(LexerLocRc, Expr)>,
 }
 
 impl std::error::Error for ParseError<'_> {}

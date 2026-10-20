@@ -1,3 +1,5 @@
+use Rc;
+
 #[derive(PartialEq, Debug)]
 pub enum Token<'a> {
     Eof,
@@ -23,6 +25,13 @@ pub struct TokenWithLoc<'a> {
 #[derive(Clone, Copy, Debug)]
 pub struct LexerLoc<'a> {
     filename: &'a str,
+    row: u32,
+    col: u32,
+}
+
+#[derive(Clone, Debug)]
+pub struct LexerLocRc {
+    filename: Rc<str>,
     row: u32,
     col: u32,
 }
@@ -125,6 +134,14 @@ impl<'a> Lexer<'a> {
             self.source = &self.source[ch.len_utf8()..];
             ch
         })
+    }
+
+    pub fn get_loc(&self) -> LexerLocRc {
+        LexerLocRc {
+            filename: self.loc.filename.into(),
+            row: self.loc.row,
+            col: self.loc.col,
+        }
     }
 
     pub fn peek_token(&self) -> Result<TokenWithLoc<'a>, LexerError<'a>> {
